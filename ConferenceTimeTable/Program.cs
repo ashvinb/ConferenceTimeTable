@@ -13,12 +13,17 @@ namespace ConferenceTimeTable
 {
     public class Program
     {
+        public const string StartTimeMorning = "09:00";
+        public const string EndTimeTimeMorning = "12:00";
+        public const string StartTimeAfternoon = "13:00";
+        public const string EndTimeTimeAfternoon = "17:00";
+
         static void Main(string[] args)
         {
             List<Talk> talkList;
 
             string input;
-            Console.WriteLine("Type file path for input or default path 'C:\\Temp\\input.txt' will be used: ");
+            Console.WriteLine("Enter file path for input or default file in path 'C:\\Temp\\input.txt' will be used: ");
             var inputPath = Console.ReadLine();
 
             if (inputPath.Length > 0)
@@ -36,12 +41,12 @@ namespace ConferenceTimeTable
 
         private static void PrintResult(Session[] sessions)
         {
-            for (int t = 0; t<=sessions.Length-1; t++)
+            for (int t = 0; t <= sessions.Length - 1; t++)
             {
                 var currentSession = sessions[t];
 
-                Console.WriteLine($"Session {t+1}");
-                for (int j = 0; j<= sessions[t].Talks.Count-1; j++)
+                Console.WriteLine($"Session {t + 1}");
+                for (int j = 0; j <= sessions[t].Talks.Count - 1; j++)
                 {
                     var currentTalk = currentSession.Talks[j];
                     if (j == 0)
@@ -52,7 +57,7 @@ namespace ConferenceTimeTable
                     }
                     else
                     {
-                        currentTalk.StarTime = currentSession.Talks[j -1].EndTime;
+                        currentTalk.StarTime = currentSession.Talks[j - 1].EndTime;
                         currentTalk.EndTime = currentTalk.StarTime.AddMinutes(currentTalk.Duration);
                     }
 
@@ -84,7 +89,7 @@ namespace ConferenceTimeTable
             {
                 filepath = "C:\\Temp\\input.txt";
             }
-            
+
             List<Talk> talkList = new List<Talk>();
             using (TextReader rdr = File.OpenText(filepath))
             {
@@ -112,7 +117,7 @@ namespace ConferenceTimeTable
                             talk.Title = description;
                             talkList.Add(talk);
                         }
-                        
+
                     }
                 }
             }
@@ -126,93 +131,113 @@ namespace ConferenceTimeTable
             int sessionNumber = 0;
             int totalTalkLength = 0;
 
-            for (int i = 0; i <= talkArray.Length-1; i++)
+            for (int i = 0; i <= talkArray.Length - 1; i++)
             {
-                int maximumTotalSessionLength = sessions[sessionNumber].MaximumTotalTrackLength;
+                int maximumTotalSessionLength = sessions[sessionNumber].MaximumTotalSessionLength;
 
                 if (i == 0)
                 {
                     if (talkArray[i].Duration <= maximumTotalSessionLength)
                     {
                         totalTalkLength = talkArray[i].Duration;
-                        if (talkArray[i].isUsed == false)
+                        if (talkArray[i].isAllocated == false)
                         {
                             sessions[sessionNumber].Talks.Add(talkArray[i]);
-                            talkArray[i].isUsed = true;
+                            talkArray[i].isAllocated = true;
                         }
-                       
+
                     }
-                    
+
                 }
                 else
                 {
                     if (totalTalkLength + talkArray[i].Duration <= maximumTotalSessionLength)
                     {
                         totalTalkLength = totalTalkLength + talkArray[i].Duration;
-                        if (talkArray[i].isUsed == false)
+                        if (talkArray[i].isAllocated == false)
                         {
                             sessions[sessionNumber].Talks.Add(talkArray[i]);
-                            talkArray[i].isUsed = true;
+                            talkArray[i].isAllocated = true;
                         }
-                        
+
                     }
                     else
                     {
                         bool isSlotfound = false;
                         //iterate over remaining sessions to see if there is a slot available
-                        for (int j = i; j < talkArray.Length-1; j++)
+                        //for (int j = i; j < talkArray.Length - 1; j++)
+                        //{
+                        //    if (totalTalkLength + talkArray[j].Duration <= maximumTotalSessionLength)
+                        //    {
+                        //        totalTalkLength = totalTalkLength + talkArray[j].Duration;
+                        //        if (talkArray[j].isAllocated == false)
+                        //        {
+                        //            sessions[sessionNumber].Talks.Add(talkArray[j]);
+                        //            talkArray[j].isAllocated = true;
+                        //        }
+
+                        //        isSlotfound = true;
+                        //    }
+                        //}
+
+                        var unallocatedtTalks = talkArray.Where(x => x.isAllocated == false).ToArray();
+
+                        for (int j = 0; j < unallocatedtTalks.Length - 1; j++)
                         {
                             if (totalTalkLength + talkArray[j].Duration <= maximumTotalSessionLength)
                             {
                                 totalTalkLength = totalTalkLength + talkArray[j].Duration;
-                                if (talkArray[j].isUsed == false)
+                                if (talkArray[j].isAllocated == false)
                                 {
                                     sessions[sessionNumber].Talks.Add(talkArray[j]);
-                                    talkArray[j].isUsed = true;
+                                    talkArray[j].isAllocated = true;
                                 }
-                                
+
                                 isSlotfound = true;
                             }
+
+                            if (isSlotfound == false)
+                            {
+                                // iterate existing sessions to find a matching slot
+                                bool slotFoundInOtherTracks = false;
+                                for (int t = 0; t <= sessionNumber - 1; t++)
+                                {
+                                    if (sessions[t].TotalTalkDuration + unallocatedtTalks[j].Duration <= sessions[t].MaximumTotalSessionLength)
+                                    {
+                                        if (unallocatedtTalks[j].isAllocated == false)
+                                        {
+                                            sessions[t].Talks.Add(unallocatedtTalks[j]);
+                                            unallocatedtTalks[j].isAllocated = true;
+                                        }
+
+                                        slotFoundInOtherTracks = true;
+                                    }
+                                }
+
+                                // If no slots found in existing sessions,
+                                // use next track
+                                if (slotFoundInOtherTracks == false)
+                                {
+                                    if (sessionNumber < sessions.Length - 1)
+                                    {
+                                        sessionNumber++;
+                                        totalTalkLength = unallocatedtTalks[j].Duration;
+                                        if (unallocatedtTalks[j].isAllocated == false)
+                                        {
+                                            sessions[sessionNumber].Talks.Add(unallocatedtTalks[j]);
+                                            unallocatedtTalks[j].isAllocated = true;
+                                        }
+
+                                    }
+
+                                }
+
+                            }
                         }
 
-                        if (isSlotfound == false)
-                        {
-                            // iterate existing sessions to find a matching slot
-                            bool slotFoundInOtherTracks = false;
-                            for (int t = 0; t <= sessionNumber - 1; t++)
-                            {
-                                if (sessions[t].TotalTalkDuration + talkArray[i].Duration <= sessions[t].MaximumTotalTrackLength)
-                                {
-                                    if (talkArray[i].isUsed == false)
-                                    {
-                                        sessions[t].Talks.Add(talkArray[i]);
-                                        talkArray[i].isUsed = true;
-                                    }
-                                    
-                                    slotFoundInOtherTracks = true;
-                                }
-                            }
 
-                            // If no slots found in existing sessions,
-                            // use next track
-                            if (slotFoundInOtherTracks == false)
-                            {
-                                if (sessionNumber < sessions.Length-1)
-                                {
-                                    sessionNumber++;
-                                    totalTalkLength = talkArray[i].Duration;
-                                    if (talkArray[i].isUsed == false)
-                                    {
-                                        sessions[sessionNumber].Talks.Add(talkArray[i]);
-                                        talkArray[i].isUsed = true;
-                                    }
-                                    
-                                }
-                                
-                            }
-                            
-                        }
                         
+
                     }
                 }
 
@@ -233,29 +258,48 @@ namespace ConferenceTimeTable
                 {
                     //morning session
                     sessions[i].SessionType = SessionType.Morning;
-                    sessions[i].StartTime =  DateTime.ParseExact("09:00", "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
-                    sessions[i].EndTime = DateTime.ParseExact("12:00", "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                    sessions[i].StartTime = DateTime.ParseExact(StartTimeMorning, "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                    sessions[i].EndTime = DateTime.ParseExact(EndTimeTimeMorning, "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
                 }
                 else
                 {
                     sessions[i].SessionType = SessionType.Afternoon;
-                    sessions[i].StartTime = DateTime.ParseExact("13:00", "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
-                    sessions[i].EndTime = DateTime.ParseExact("17:00", "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                    sessions[i].StartTime = DateTime.ParseExact(StartTimeAfternoon, "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
+                    sessions[i].EndTime = DateTime.ParseExact(EndTimeTimeAfternoon, "HH:mm", System.Globalization.CultureInfo.InvariantCulture);
                 }
             }
 
             return sessions;
         }
-        
+
     }
 
     public class Conference
     {
-        public List<Session> Sessions { get; }
+        public Conference()
+        {
+            Tracks = new List<Track>();
+        }
+        public List<Track> Tracks { get; }
+    }
+
+    public class Track
+    {
+        public List<Session> Sessions {get; set;}
+
+        public Track()
+        {
+            Sessions = new List<Session>();
+        }
     }
 
     public class Session
     {
+        public Session()
+        {
+            Talks = new List<Talk>();
+        }
+
         public List<Talk> Talks { get; set; }
 
         public DateTime StartTime { get; set; }
@@ -269,18 +313,13 @@ namespace ConferenceTimeTable
             get { return this.Talks.Sum(x => x.Duration); }
         }
 
-        public int MaximumTotalTrackLength
+        public int MaximumTotalSessionLength
         {
             get
             {
                 TimeSpan interval = EndTime - StartTime;
                 return (int)interval.TotalMinutes;
             }
-        }
-
-        public Session()
-        {
-            Talks = new List<Talk>();
         }
     }
 
@@ -294,7 +333,7 @@ namespace ConferenceTimeTable
 
         public DateTime EndTime { get; set; }
 
-        public bool isUsed { get; set; }
+        public bool isAllocated { get; set; }
 
         public string FormattedStartTime => this.StarTime.ToString("HH:mm");
 
