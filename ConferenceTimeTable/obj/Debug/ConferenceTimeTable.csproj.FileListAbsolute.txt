@@ -12,3 +12,10 @@ C:\Users\XY58025\Downloads\ConferenceTimeTable\ConferenceTimeTable\obj\Debug\Con
 C:\Users\XY58025\Downloads\ConferenceTimeTable\ConferenceTimeTable\obj\Debug\ConferenceTimeTable.csproj.CoreCompileInputs.cache
 C:\Users\XY58025\Downloads\ConferenceTimeTable\ConferenceTimeTable\obj\Debug\ConferenceTimeTable.exe
 C:\Users\XY58025\Downloads\ConferenceTimeTable\ConferenceTimeTable\obj\Debug\ConferenceTimeTable.pdb
+C:\Work\ConferenceTimeTable\ConferenceTimeTable\bin\Debug\ConferenceTimeTable.exe.config
+C:\Work\ConferenceTimeTable\ConferenceTimeTable\bin\Debug\ConferenceTimeTable.exe
+C:\Work\ConferenceTimeTable\ConferenceTimeTable\bin\Debug\ConferenceTimeTable.pdb
+C:\Work\ConferenceTimeTable\ConferenceTimeTable\obj\Debug\ConferenceTimeTable.csprojAssemblyReference.cache
+C:\Work\ConferenceTimeTable\ConferenceTimeTable\obj\Debug\ConferenceTimeTable.csproj.CoreCompileInputs.cache
+C:\Work\ConferenceTimeTable\ConferenceTimeTable\obj\Debug\ConferenceTimeTable.exe
+C:\Work\ConferenceTimeTable\ConferenceTimeTable\obj\Debug\ConferenceTimeTable.pdb
